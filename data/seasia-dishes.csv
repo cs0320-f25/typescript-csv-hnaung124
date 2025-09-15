@@ -1,0 +1,9 @@
+dish,price,origin,notes
+Pad Thai,12,,Empty origin field
+Nasi Goreng,,Indonesia,Missing price
+"Bun, Cha",10,Vietnam,Dish name contains comma
+"Rendang ""Beef""",15,Indonesia,Dish name contains quotes
+Laksa,9,"Singapore, Malaysia","Origin contains comma"
+Adobo,8,Philippines,"  leading and trailing spaces  "
+,7,Myanmar,Missing dish name
+Satay,,,"Multiple missing fields"
