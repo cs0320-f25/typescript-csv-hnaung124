@@ -1,5 +1,16 @@
 import * as fs from "fs";
 import * as readline from "readline";
+import { ZodError, ZodType } from "zod";
+
+// Interface for structured row validation errors
+export interface RowError<T> {
+  // number of row that failed
+  rowIndex: number;    
+  // the row contents
+  rowData: string[]; 
+  // the Zod validation error
+  error: ZodError<T>; 
+}
 
 /**
  * This is a JSDoc comment. Similar to JavaDoc, it documents a public-facing
@@ -14,7 +25,7 @@ import * as readline from "readline";
  * @param path The path to the file being loaded.
  * @returns a "promise" to produce a 2-d array of cell values
  */
-export async function parseCSV(path: string): Promise<string[][]> {
+export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<{data: T[]; errors: RowError<T>[]} | string[][]> {
   // This initial block of code reads from a file in Node.js. The "rl"
   // value can be iterated over in a "for" loop. 
   const fileStream = fs.createReadStream(path);
@@ -22,16 +33,47 @@ export async function parseCSV(path: string): Promise<string[][]> {
     input: fileStream,
     crlfDelay: Infinity, // handle different line endings
   });
-  
-  // Create an empty array to hold the results
-  let result = []
-  
-  // We add the "await" here because file I/O is asynchronous. 
-  // We need to force TypeScript to _wait_ for a row before moving on. 
-  // More on this in class soon!
-  for await (const line of rl) {
-    const values = line.split(",").map((v) => v.trim());
-    result.push(values)
+
+  // If no Zod schema is provided, the parser defaults to returning a string[][]:
+  // It reads each CSV row, splits it by commas, trims whitespace,
+  // and returns a simple array of string arrays (string[][]) without validation or transformation.
+  if (!schema) {
+    const rawRows: string[][] = [];
+    for await (const line of rl) {
+      rawRows.push(line.split(",").map((v) => v.trim()));
+    }
+    return rawRows;
   }
-  return result
+
+  // Create an empty array to hold the transformed data
+  const data: T[] = [];
+  // Create an empty array to hold the errors
+  const errors: RowError<T>[] = [];
+  // Counter for row index
+  let rowIndex = 0;
+
+  for await (const line of rl) {
+    // Split the line by commas and trim whitespace from each field
+    const values = line.split(",").map((v) => v.trim());
+    // Validate and transform the row using the provided Zod schema
+    const parsed = schema.safeParse(values);
+
+    if (parsed.success) {
+      // If the row is valid, push the transformed data into the "data" array
+      data.push(parsed.data);
+    } else {
+      // If the row is invalid, record the row index, data and Zod Error in the "error" array
+      errors.push({
+        rowIndex,
+        rowData: values,
+        error: parsed.error,
+      });
+    }
+
+    // Increment the row index for tracking errors
+    rowIndex++;
+  }
+
+  // Return the arrays of valid data and errors
+  return { data, errors };
 }
