@@ -1,0 +1,7 @@
+name,club,position,age,isCaptain,email,contractEnd,status
+Harry Kane,Tottenham,Forward,30,true,harry.kane@tottenham.com,2024-06-30,active
+Mohamed Salah,Liverpool,Forward,31,false,m.salah@liverpool.com,2024-06-30,active
+Kevin De Bruyne,Manchester City,Midfielder,Not Age,true,k.debruyne@manchestercity.com,2025-06-30,active
+Virgil van Dijk,Liverpool,Defender,29,false,v.vandijk.com,2024-06-30,active
+Alisson Becker,Liverpool,Goalkeeper,Not Age,false,alisson@,2024-06-30,active
+Jack Grealish,Manchester City,Midfielder,28,false,j.grealish@manchestercity.com,2025-06-30,Hello

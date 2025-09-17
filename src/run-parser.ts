@@ -1,14 +1,33 @@
-import { parseCSV } from "./basic-parser";
+import { RowError, parseCSV } from "./basic-parser";
+import * as path from "path";
+import z from "zod";
 
-/*
-  Example of how to run the parser outside of a test suite.
-*/
-
-const DATA_FILE = "./data/people.csv"; // update with your actual file name
+const DATA_FILE = path.join(__dirname, "../data/soccer-players.csv")
+const PlayerRowSchema = z
+  .tuple([
+    z.string(),                   // name
+    z.string(),                   // team
+    z.string(),                   // position
+    z.number(),            // age
+    z.boolean(),           // isCaptain
+    z.email(),           // email
+    z.date(),                   // contractEndDate 
+    z.enum(["active", "inactive"])      // status
+  ])
+  .transform(([name, team, position, age, isCaptain, email, contractEndDate, status]) => ({
+    name,
+    team,
+    position,
+    age,
+    isCaptain,
+    email,
+    contractEndDate,
+    status
+  }));
 
 async function main() {
   // Because the parseCSV function needs to "await" data, we need to do the same here.
-  const results = await parseCSV(DATA_FILE)
+  const results = await parseCSV(DATA_FILE, PlayerRowSchema)
 
   // Notice the difference between "of" and "in". One iterates over the entries, 
   // another iterates over the indexes only.

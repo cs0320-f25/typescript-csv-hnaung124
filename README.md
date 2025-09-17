@@ -100,16 +100,31 @@
 ### 1340 Supplement
 
 - #### 1. Correctness
+    I think the CSVparser should be able to do the following:
+    1. Each row should end up with the right number of columns, and the values stay in order.
+    2. Quoted values, commas inside quotes, and newlines in fields should all work without breaking things.
+    3. Strings should convert to the right type (number, boolean, date), and errors should be flagged when they don’t.
+    4. The header row should be recognized and either skipped or used to name fields correctly.
+    5. Files with just headers or even empty files should parse without errors.
 
 - #### 2. Random, On-Demand Generation
+    I’d probably make it generate rows of data with empty fields, super long text, or unexpected characters like commas and new lines and quotes. I’d also mix up types like putting a string where a number should be to check if the errors get flagged. I will then also go through some of the lines to make them "bad". Also, I will try making big CSVs, empty CSVs, CSVs with only headers to see if the parser still works.
 
 - #### 3. Overall experience, Bugs encountered and resolved
 #### Errors/Bugs:
+    I had a bug where I was trying to log zod errors in the error csv and it kept showing me multiple lines of error messags 
+    that were not very human readable
 #### Tests:
+    I tested if my schema validates number, string, email and enums (where I wrote down valid values). I tested that on soccer-players.csv. seasia-dishes.csv is not ready for use as I have not updated my parser to deal with commas and quotes. etc
 #### How To…
+    npm test
 
 #### Team members and contributions (include cs logins):
+    Solo Project!
 
-#### Collaborators (cslogins of anyone you worked with on this project and/or generative AI):
-#### Total estimated time it took to complete project:
-#### Link to GitHub Repo:  
+#### Collaborators (cslogins of anyone you worked with on this project and/or generative AI): 
+    ChatGPT
+#### Total estimated time it took to complete project: 
+    8 hours
+#### Link to GitHub Repo: 
+    https://github.com/cs0320-f25/typescript-csv-hnaung124

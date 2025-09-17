@@ -8,8 +8,8 @@ export interface RowError<T> {
   rowIndex: number;    
   // the row contents
   rowData: string[]; 
-  // the Zod validation error
-  error: ZodError<T>; 
+  // the Zod validation error message
+  errorMessage: string; 
 }
 
 /**
@@ -25,7 +25,7 @@ export interface RowError<T> {
  * @param path The path to the file being loaded.
  * @returns a "promise" to produce a 2-d array of cell values
  */
-export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<{data: T[]; errors: RowError<T>[]} | string[][]> {
+export async function parseCSV<T>(path: string, schema?: ZodType<T> | undefined): Promise< T[] | RowError<T>[] | string[][]> {
   // This initial block of code reads from a file in Node.js. The "rl"
   // value can be iterated over in a "for" loop. 
   const fileStream = fs.createReadStream(path);
@@ -51,8 +51,11 @@ export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<{d
   const errors: RowError<T>[] = [];
   // Counter for row index
   let rowIndex = 0;
-
   for await (const line of rl) {
+    if (rowIndex === 0) {  // first row is header
+        rowIndex++;
+        continue;           // skip header
+    }
     // Split the line by commas and trim whitespace from each field
     const values = line.split(",").map((v) => v.trim());
     // Validate and transform the row using the provided Zod schema
@@ -66,14 +69,19 @@ export async function parseCSV<T>(path: string, schema?: ZodType<T>): Promise<{d
       errors.push({
         rowIndex,
         rowData: values,
-        error: parsed.error,
+        errorMessage: parsed.error.issues.map(e => e.message).join(", ")
       });
     }
-
     // Increment the row index for tracking errors
     rowIndex++;
   }
 
-  // Return the arrays of valid data and errors
-  return { data, errors };
+  // Return the arrays of valid data and
+  if(errors.length > 0){
+    return errors;
+  }
+  else{
+    return data;
+  }
 }
+
